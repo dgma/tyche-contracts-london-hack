@@ -1,7 +1,7 @@
 const { VerifyPlugin } = require("@dgma/hardhat-sol-bundler/plugins/Verify");
 
 const config = {
-  Template: {},
+  Oracle: {},
 };
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
     config: config,
   },
   localhost: { lockFile: "./local.deployment-lock.json", config: config },
-  "arbitrum-sepolia": {
+  baseSepolia: {
     lockFile: "./deployment-lock.json",
     verify: true,
     plugins: [VerifyPlugin],

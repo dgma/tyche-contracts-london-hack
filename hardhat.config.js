@@ -33,23 +33,23 @@ module.exports = {
     localhost: {
       deployment: deployments.localhost,
     },
-    "arbitrum-sepolia": {
-      url: config?.RPC_URL || DEFAULT_RPC,
+    baseSepolia: {
+      url: config?.parsed?.BASE_SEPOLIA_RPC || DEFAULT_RPC,
       accounts: deployerAccounts,
-      deployment: deployments["arbitrum-sepolia"],
+      deployment: deployments["baseSepolia"],
     },
   },
   etherscan: {
     apiKey: {
-      "arbitrum-sepolia": config?.parsed?.ABISCAN_API_KEY,
+      baseSepolia: config?.parsed?.BASE_API_KEY,
     },
     customChains: [
       {
-        network: "arbitrum-sepolia",
-        chainId: 421614,
+        network: "baseSepolia",
+        chainId: 84532,
         urls: {
-          apiURL: "https://api-sepolia.arbiscan.io/api",
-          browserURL: "https://sepolia-explorer.arbitrum.io",
+          apiURL: "https://api-sepolia.basescan.org/api",
+          browserURL: "https://sepolia.basescan.org/",
         },
       },
     ],
