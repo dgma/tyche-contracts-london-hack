@@ -1,7 +1,17 @@
 const { VerifyPlugin } = require("@dgma/hardhat-sol-bundler/plugins/Verify");
+const { dynamicAddress } = require("@dgma/hardhat-sol-bundler");
 
 const config = {
-  Oracle: {},
+  ArraySort: {},
+  OracleMath: {},
+  Oracle: {
+    options: {
+      libs: {
+        ArraySort: dynamicAddress("ArraySort"),
+        OracleMath: dynamicAddress("OracleMath"),
+      },
+    },
+  },
 };
 
 module.exports = {
