@@ -18,6 +18,7 @@ contract OracleTest is Test {
 
     function setUp() public {
         oracle = new Oracle();
+        oracle.register();
     }
 
     function test_decimals() public {
@@ -89,6 +90,8 @@ contract OracleTest is Test {
         for (uint8 i = 0; i < 10; i++) {
             string memory s = Strings.toString(i);
             addresses[i] = makeAddr(s);
+            hoax(addresses[i]);
+            oracle.register();
         }
     }
 
@@ -126,7 +129,7 @@ contract OracleTest is Test {
         }
     }
 
-    function testFuzz_revealThree(uint256[10] memory secrets, uint256 price1, uint256 price2)
+    function testFuzz_revealTen(uint256[10] memory secrets, uint256 price1, uint256 price2)
         public
     {
         uint256[10] memory prices = _genPrices(price1, price2);
@@ -135,5 +138,10 @@ contract OracleTest is Test {
         vm.roll(26);
         _doReveals(secrets, prices, addresses);
         assert(oracle.getPrice() == price1 || oracle.getPrice() == price2);
+    }
+
+    function test_xxx() public view {
+        console.logBytes32(keccak256(abi.encode(472583180087, 254384457050125)));
+        assert(true);
     }
 }

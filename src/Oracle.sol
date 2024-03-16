@@ -1,31 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {OracleMath} from "src/libs/OracleMath.sol";
 import {ArraySort} from "src/libs/ArraySort.sol";
 import {IOracle, CommitTooEarly, RevealTooEarly, InvalidReveal} from "src/Oracle.types.sol";
 
 contract Oracle is IOracle {
     using OracleMath for uint256;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
+    EnumerableSet.AddressSet private nodesRegistry;
     mapping(address => bytes32) private hashValues;
     mapping(uint256 => uint256) private epochRandom;
     mapping(uint256 => uint256[]) private epochRevealedPrices;
     mapping(uint256 => uint256) private epochPrice;
-
-    function decimals() public pure virtual returns (uint8) {
-        return 8;
-    }
-
-    // adjust it to different L2s
-    function epochLength() public pure virtual returns (uint16) {
-        return 50;
-    }
-
-    function getPrice() external view returns (uint256) {
-        return epochPrice[getActiveEpoch()];
-    }
 
     modifier allowCommit() {
         if (!canCommit()) {
@@ -41,13 +30,36 @@ contract Oracle is IOracle {
         _;
     }
 
-    // adjust it to different L2s
-    function getL1BlockNumber() internal view virtual returns (uint256) {
+    function priceCommetiSize() public pure virtual returns (uint16) {
+        return 5;
+    }
+
+    function decimals() public pure virtual returns (uint8) {
+        return 8;
+    }
+
+    function epochLength() public pure virtual returns (uint32) {
+        return 50;
+    }
+
+    function getPrevRandom() private view returns (uint256) {
+        uint256 ep = getActiveEpoch();
+        if (ep == 0) {
+            return 0;
+        }
+        return epochRandom[(ep - 1)];
+    }
+
+    function getBlockNumber() internal view virtual returns (uint256) {
         return block.number;
     }
 
+    function getPrice() external view returns (uint256) {
+        return epochPrice[getActiveEpoch()];
+    }
+
     function getActiveEpoch() public view returns (uint256) {
-        return getL1BlockNumber().floorDiv(epochLength());
+        return getBlockNumber().floorDiv(epochLength());
     }
 
     // 0 - 24
@@ -71,12 +83,36 @@ contract Oracle is IOracle {
     }
 
     function canCommit() public view returns (bool) {
-        uint256 blockNum = getL1BlockNumber();
-        return (_getMinCommimentBlock() <= blockNum && blockNum <= _getMaxCommimentBlock());
+        uint256 blockNum = getBlockNumber();
+        uint256 random = getPrevRandom();
+        bool isCommitPhase =
+            _getMinCommimentBlock() <= blockNum && blockNum <= _getMaxCommimentBlock();
+        if (!isCommitPhase) {
+            return false;
+        }
+
+        // allow to articipate enyone at initial stage
+        if (random == 0) {
+            return nodesRegistry.contains(msg.sender);
+        } else {
+            uint256 regLen = nodesRegistry.length();
+            uint256 nodeIndex = random % regLen;
+            uint256 step = regLen.ceilDiv(2);
+            for (uint256 i = 0; i < priceCommetiSize(); i++) {
+                if (nodeIndex >= regLen) {
+                    nodeIndex = nodeIndex % regLen;
+                }
+                if (nodesRegistry.at(nodeIndex) == msg.sender) {
+                    return isCommitPhase;
+                }
+                nodeIndex += step;
+            }
+            return false;
+        }
     }
 
     function canReveal() public view returns (bool) {
-        uint256 blockNum = getL1BlockNumber();
+        uint256 blockNum = getBlockNumber();
         return (_getMinRevealBlock() <= blockNum && blockNum <= _getMaxRevealBlock());
     }
 
@@ -110,5 +146,13 @@ contract Oracle is IOracle {
             ArraySort.bubble(selectedPrices, indexesToGrab);
             epochPrice[ep] = selectedPrices[indexesToGrab.ceilDiv(2)];
         }
+    }
+
+    function register() external {
+        nodesRegistry.add(msg.sender);
+    }
+
+    function unRegister() external {
+        nodesRegistry.remove(msg.sender);
     }
 }
