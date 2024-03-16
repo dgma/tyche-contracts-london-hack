@@ -83,6 +83,7 @@ contract OracleTest is Test {
         oracle.commit(commitedHash);
         vm.roll(26);
         oracle.reveal(secret, price);
+        vm.roll(55);
         assertEq(oracle.getPrice(), price);
     }
 
@@ -137,11 +138,7 @@ contract OracleTest is Test {
         _doCommits(secrets, prices, addresses);
         vm.roll(26);
         _doReveals(secrets, prices, addresses);
+        vm.roll(53);
         assert(oracle.getPrice() == price1 || oracle.getPrice() == price2);
-    }
-
-    function test_xxx() public view {
-        console.logBytes32(keccak256(abi.encode(472583180087, 254384457050125)));
-        assert(true);
     }
 }

@@ -55,7 +55,11 @@ contract Oracle is IOracle {
     }
 
     function getPrice() external view returns (uint256) {
-        return epochPrice[getActiveEpoch()];
+        uint256 ep = getActiveEpoch();
+        if (ep == 0) {
+            return 0;
+        }
+        return epochPrice[ep - 1];
     }
 
     function getActiveEpoch() public view returns (uint256) {
