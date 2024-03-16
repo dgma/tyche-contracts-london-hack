@@ -62,22 +62,21 @@ contract OracleTest is Test {
     }
 
     function testFuzz_canNotCommit(uint256 blockNum) public {
-        // any last 25 blocks of epoch
-        vm.assume(blockNum < oracle.epochLength() && blockNum > oracle.epochLength() / 2);
+        vm.assume(blockNum > 25 && blockNum < 50);
         vm.roll(blockNum);
         assertEq(oracle.canCommit(), false);
     }
 
     function test_canReveal(uint256 blockNum) public {
-        vm.assume(blockNum < oracle.epochLength() && blockNum < oracle.epochLength() / 2);
+        vm.assume(blockNum > 25 && blockNum < 50);
         vm.roll(blockNum);
-        assertEq(oracle.canReveal(), false);
+        assertEq(oracle.canReveal(), true);
     }
 
     function test_canNotReveal(uint256 blockNum) public {
-        vm.assume(blockNum > (oracle.epochLength() / 2) && blockNum < oracle.epochLength());
+        vm.assume(blockNum < 25);
         vm.roll(blockNum);
-        assertEq(oracle.canReveal(), true);
+        assertEq(oracle.canReveal(), false);
     }
 
     function testFuzz_revealOne(uint256 secret, uint256 price) public {
