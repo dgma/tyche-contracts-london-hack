@@ -4,11 +4,7 @@ pragma solidity ^0.8.20;
 // import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {OracleMath} from "src/libs/OracleMath.sol";
 import {ArraySort} from "src/libs/ArraySort.sol";
-import {IOracle} from "src/Oracle.types.sol";
-
-error CommitTooEarly();
-error RevealTooEarly();
-error InvalidReveal();
+import {IOracle, CommitTooEarly, RevealTooEarly, InvalidReveal} from "src/Oracle.types.sol";
 
 contract Oracle is IOracle {
     using OracleMath for uint256;
@@ -18,12 +14,13 @@ contract Oracle is IOracle {
     mapping(uint256 => uint256[]) private epochRevealedPrices;
     mapping(uint256 => uint256) private epochPrice;
 
-    function _convert(uint256 value) private pure returns (uint256) {
-        return value * 10 ** decimals();
+    function decimals() public pure virtual returns (uint8) {
+        return 8;
     }
 
-    function decimals() public pure returns (uint8) {
-        return 8;
+    // adjust it to different L2s
+    function epochLength() public pure virtual returns (uint16) {
+        return 50;
     }
 
     function getPrice() external view returns (uint256) {
@@ -44,19 +41,13 @@ contract Oracle is IOracle {
         _;
     }
 
-    function epochLength() public pure returns (uint16) {
-        return 50;
-    }
-
-    // todo: adjust it to different L2s
+    // adjust it to different L2s
     function getL1BlockNumber() internal view virtual returns (uint256) {
         return block.number;
     }
 
     function getActiveEpoch() public view returns (uint256) {
-        // 125 - 125 % 50 = 125 - 25 = 100;
-        // 100 / 50 = 2;
-        return getL1BlockNumber().roundFloor(epochLength());
+        return getL1BlockNumber().floorDiv(epochLength());
     }
 
     // 0 - 24
@@ -110,7 +101,7 @@ contract Oracle is IOracle {
             uint256 step = len.ceilDiv(10);
             uint256[] memory selectedPrices = new uint256[](indexesToGrab);
             for (uint256 i = 0; i < indexesToGrab; i++) {
-                if (priceIndex > len) {
+                if (priceIndex >= len) {
                     priceIndex = priceIndex % len;
                 }
                 selectedPrices[i] = epochRevealedPrices[ep][priceIndex];
