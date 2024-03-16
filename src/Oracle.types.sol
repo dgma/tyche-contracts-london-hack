@@ -10,5 +10,5 @@ interface IOracle {
 
     function canCommit() external returns (bool);
 
-    function reveal(bytes32 secret, uint256 price) external;
+    function reveal(uint256 secret, uint256 price) external;
 }
