@@ -91,16 +91,19 @@ contract Oracle is IOracle {
         uint256 random = getPrevRandom();
         bool isCommitPhase =
             _getMinCommimentBlock() <= blockNum && blockNum <= _getMaxCommimentBlock();
+
         if (!isCommitPhase) {
             return false;
         }
 
-        // allow to articipate enyone at initial stage
+        // allows to articipate enyone at initial phase
         if (random == 0) {
             return nodesRegistry.contains(msg.sender);
         } else {
+            // randomly selects commeti
             uint256 regLen = nodesRegistry.length();
             uint256 nodeIndex = random % regLen;
+            // todo improve randomisation selection
             uint256 step = regLen.ceilDiv(2);
             for (uint256 i = 0; i < priceCommetiSize(); i++) {
                 if (nodeIndex >= regLen) {

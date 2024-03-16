@@ -3,6 +3,7 @@ const config = require("dotenv").config();
 require("@nomicfoundation/hardhat-foundry");
 require("@nomicfoundation/hardhat-toolbox");
 require("@dgma/hardhat-sol-bundler");
+require("./tasks");
 const { ZeroHash } = require("ethers");
 const deployments = require("./deployment.config");
 
@@ -38,10 +39,16 @@ module.exports = {
       accounts: deployerAccounts,
       deployment: deployments["baseSepolia"],
     },
+    arbitrumSepolia: {
+      url: config?.parsed?.ARBITRUM_SEPOLIA_RPC || DEFAULT_RPC,
+      accounts: deployerAccounts,
+      deployment: deployments["arbitrumSepolia"],
+    },
   },
   etherscan: {
     apiKey: {
       baseSepolia: config?.parsed?.BASE_API_KEY,
+      arbitrumSepolia: config?.parsed?.ARBISCAN_API_KEY,
     },
     customChains: [
       {
@@ -50,6 +57,14 @@ module.exports = {
         urls: {
           apiURL: "https://api-sepolia.basescan.org/api",
           browserURL: "https://sepolia.basescan.org/",
+        },
+      },
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia-explorer.arbitrum.io",
         },
       },
     ],

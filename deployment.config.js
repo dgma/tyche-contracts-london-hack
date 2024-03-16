@@ -1,10 +1,14 @@
 const { VerifyPlugin } = require("@dgma/hardhat-sol-bundler/plugins/Verify");
 const { dynamicAddress } = require("@dgma/hardhat-sol-bundler");
 
-const configBase = {
+const sharedConfig = {
   ArraySort: {},
   OracleMath: {},
-  Oracle: {
+};
+
+const configBase = {
+  ...sharedConfig,
+  OracleBase: {
     options: {
       libs: {
         ArraySort: dynamicAddress("ArraySort"),
@@ -15,7 +19,7 @@ const configBase = {
 };
 
 const configArbitrum = {
-  ...configBase,
+  ...sharedConfig,
   OracleArbitrum: {
     options: {
       libs: {
@@ -36,5 +40,11 @@ module.exports = {
     verify: true,
     plugins: [VerifyPlugin],
     config: configBase,
+  },
+  arbitrumSepolia: {
+    lockFile: "./deployment-lock.json",
+    verify: true,
+    plugins: [VerifyPlugin],
+    config: configArbitrum,
   },
 };
