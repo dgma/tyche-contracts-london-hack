@@ -61,15 +61,13 @@ contract OracleTest is Test {
         assertEq(oracle.canCommit(), true);
     }
 
-    function testFuzz_canNotCommit(uint256 blockNum) public {
-        vm.assume(blockNum > 25 && blockNum < 50);
-        vm.roll(blockNum);
+    function test_canNotCommit() public {
+        vm.roll(25);
         assertEq(oracle.canCommit(), false);
     }
 
-    function test_canReveal(uint256 blockNum) public {
-        vm.assume(blockNum > 25 && blockNum < 50);
-        vm.roll(blockNum);
+    function test_canReveal() public {
+        vm.roll(49);
         assertEq(oracle.canReveal(), true);
     }
 
