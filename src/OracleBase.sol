@@ -5,6 +5,6 @@ import {Oracle} from "src/Oracle.sol";
 
 contract OracleBase is Oracle {
     function epochLength() public pure override returns (uint32) {
-        return 100;
+        return 16;
     }
 }
